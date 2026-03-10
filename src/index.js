@@ -10,7 +10,8 @@ import makeWASocket, {
     makeCacheableSignalKeyStore,
     isJidBroadcast,
 } from '@whiskeysockets/baileys';
-import qrcode from 'qrcode-terminal';
+import QRCode from 'qrcode';
+import { exec } from 'child_process';
 import pino from 'pino';
 import { existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
@@ -64,7 +65,7 @@ async function connect() {
             creds: state.creds,
             keys: makeCacheableSignalKeyStore(state.keys, logger),
         },
-        printQRInTerminal: false,  // Vamos exibir manualmente com qrcode-terminal
+        printQRInTerminal: true,   // Exibe QR no próprio terminal do Baileys
         generateHighQualityLinkPreview: false,
         syncFullHistory: false,
         markOnlineOnConnect: true,
@@ -75,14 +76,29 @@ async function connect() {
         const { connection, lastDisconnect, qr } = update;
 
         if (qr) {
-            console.clear();
-            console.log('\n' + '═'.repeat(58));
-            console.log(`🦷  ${CLINIC_NAME} — Secretária Virtual ${BOT_NAME}`);
-            console.log('═'.repeat(58));
-            console.log('📱 Escaneie o QR Code abaixo com o WhatsApp da clínica:');
-            console.log('   (Abra o WhatsApp → Menu → Aparelhos vinculados → Vincular)\n');
-            qrcode.generate(qr, { small: true });
-            console.log('\n⏳ Aguardando leitura do QR Code...\n');
+            // ── Salva o QR como imagem PNG ──────────────────────
+            const qrImagePath = join(__dirname, '..', 'qr.png');
+            try {
+                await QRCode.toFile(qrImagePath, qr, { width: 400, margin: 2 });
+                console.log('\n' + '═'.repeat(60));
+                console.log(`🦷  ${CLINIC_NAME} — Secretária Virtual ${BOT_NAME}`);
+                console.log('═'.repeat(60));
+                console.log('📱 QR Code gerado de DUAS formas:');
+                console.log('');
+                console.log('  ① Imagem PNG salva em:');
+                console.log(`     ${qrImagePath}`);
+                console.log('     → Abra esse arquivo e escaneie com o celular!');
+                console.log('');
+                console.log('  ② QR Code no terminal logo abaixo ↓↓↓');
+                console.log('═'.repeat(60) + '\n');
+                // Abre automaticamente a imagem no Windows
+                exec(`start "" "${qrImagePath}"`, (err) => {
+                    if (!err) console.log('✅ Imagem do QR Code aberta automaticamente!\n');
+                });
+            } catch (e) {
+                console.log('⚠️  Erro ao salvar imagem:', e.message);
+            }
+            console.log('⏳ Escaneie o QR Code acima para conectar...\n');
         }
 
         if (connection === 'close') {
