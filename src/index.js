@@ -10,7 +10,6 @@ import makeWASocket, {
     makeCacheableSignalKeyStore,
     isJidBroadcast,
 } from '@whiskeysockets/baileys';
-import { Boom } from '@hapi/boom';
 import qrcode from 'qrcode-terminal';
 import pino from 'pino';
 import { existsSync, mkdirSync } from 'fs';
@@ -87,7 +86,7 @@ async function connect() {
         }
 
         if (connection === 'close') {
-            const code = (lastDisconnect?.error as Boom)?.output?.statusCode;
+            const code = lastDisconnect?.error?.output?.statusCode;
             const shouldReconnect = code !== DisconnectReason.loggedOut;
 
             console.log(`\n❌ Conexão encerrada [código: ${code}]`);
