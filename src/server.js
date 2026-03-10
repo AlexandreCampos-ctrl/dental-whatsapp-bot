@@ -7,8 +7,6 @@ import cors from 'cors';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import {
-    getPatientsAll, createPatient as dbCreatePatient, updatePatient as dbUpdatePatient,
-    deletePatientsGeneric,
     readDB, writeDB,
 } from './database.js';
 
