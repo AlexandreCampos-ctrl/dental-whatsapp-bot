@@ -19,6 +19,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { initReminders } from './reminders.js';
 import { processMessage } from './flows.js';
+import { startServer } from './server.js';
 
 dotenv.config();
 
@@ -200,7 +201,8 @@ async function connect() {
 
 // ─── Inicialização ────────────────────────────────────────────
 
-console.log('\n🦷 DentalPro — Iniciando Secretária Virtual...\n');
+console.log('\n🦷 DentalPro — Iniciando Secretária Virtual + API...\n');
+startServer();
 connect().catch(err => {
     console.error('❌ Erro fatal ao iniciar:', err);
     process.exit(1);

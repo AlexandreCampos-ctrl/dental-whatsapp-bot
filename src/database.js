@@ -43,19 +43,19 @@ const DEFAULT_DB = {
 
 // ─── Leitura / Escrita ────────────────────────────────────────
 
-function readDB() {
+export function readDB() {
     if (!existsSync(DB_PATH)) {
         writeFileSync(DB_PATH, JSON.stringify(DEFAULT_DB, null, 2), 'utf-8');
-        return DEFAULT_DB;
+        return { ...DEFAULT_DB };
     }
     try {
         return JSON.parse(readFileSync(DB_PATH, 'utf-8'));
     } catch {
-        return DEFAULT_DB;
+        return { ...DEFAULT_DB };
     }
 }
 
-function writeDB(data) {
+export function writeDB(data) {
     writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf-8');
 }
 
