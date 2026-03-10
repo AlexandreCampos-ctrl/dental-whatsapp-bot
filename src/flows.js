@@ -7,6 +7,7 @@ import {
     getAvailableSlots, createAppointment, getNextAppointment,
     cancelAppointment, rescheduleAppointment, confirmAppointment,
     getPatientAppointments, formatDate, formatAppointment,
+    createPayment,
 } from './database.js';
 import { MSG } from './messages.js';
 import { format, parse, isValid, isFuture, isToday } from 'date-fns';
@@ -280,14 +281,26 @@ async function handleBookConfirm(phone, msg, send) {
         const dentist = getDentistById(session.data.dentistId);
         const endHour = calcEndTime(session.data.time, service.duration);
 
-        createAppointment({
+        const appt = createAppointment({
+            patientId: patient?.id, // Vincula ao ID do dashboard
             patientPhone: phone,
-            patientName: patient.name,
+            patientName: patient?.name || 'Paciente WhatsApp',
             dentistId: session.data.dentistId,
             serviceId: session.data.serviceId,
             date: session.data.date,
             startTime: session.data.time,
             endTime: endHour,
+        });
+
+        // Cria registro financeiro pendente automaticamente
+        createPayment({
+            appointmentId: appt.id,
+            patientId: patient?.id,
+            amount: service.price,
+            method: 'pix', // default para bot
+            status: 'pendente',
+            notes: 'Agendado via WhatsApp',
+            paidAt: '',
         });
 
         const info = {

@@ -146,14 +146,30 @@ export function createAppointment(data) {
     const db = readDB();
     const appt = {
         id: `a${Date.now()}`,
-        ...data,
         status: 'agendada',
         reminderSent: false,
         createdAt: new Date().toISOString(),
+        ...data,
     };
     db.appointments.push(appt);
     writeDB(db);
     return appt;
+}
+
+export function createPayment(data) {
+    const db = readDB();
+    const pay = {
+        id: `pay${Date.now()}`,
+        status: 'pendente',
+        paidAt: '',
+        notes: '',
+        ...data,
+        createdAt: new Date().toISOString(),
+    };
+    db.payments = db.payments || [];
+    db.payments.push(pay);
+    writeDB(db);
+    return pay;
 }
 
 export function getPatientAppointments(phone) {
