@@ -88,6 +88,31 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// ─── WhatsApp Messenger Bridge ───────────────────────────────
+let whatsappMessenger = null;
+export function setMessenger(fn) {
+    whatsappMessenger = fn;
+}
+
+async function notifyReschedule(apptId, oldData, newData) {
+    if (!whatsappMessenger) return;
+    if (oldData.date === newData.date && oldData.startTime === newData.startTime) return;
+
+    const db = readDB();
+    const appt = db.appointments.find(a => a.id === apptId);
+    if (!appt) return;
+
+    const patientPhone = appt.patientPhone;
+    if (!patientPhone) return;
+
+    const dentist = db.dentists.find(d => d.id === appt.dentistId);
+    const service = db.services.find(s => s.id === appt.serviceId);
+
+    const msg = `📅 *Consulta Remarcada!*\n\nOlá! Sua consulta na *${process.env.CLINIC_NAME || 'DentalPro'}* foi atualizada:\n\n🦷 *Procedimento:* ${service?.name || 'Consulta'}\n👨‍⚕️ *Dentista:* ${dentist?.name || 'Equipe'}\n🗓️ *Nova Data:* ${new Date(appt.date + 'T12:00:00').toLocaleDateString('pt-BR')}\n⏰ *Novo Horário:* ${appt.startTime}\n\nEsperamos você! 😊`;
+
+    whatsappMessenger(patientPhone, msg);
+}
+
 // ─── Rota de sincronização inicial ────────────────────────────
 // O Dashboard usa isso para hidratar o localStorage com dados reais
 
@@ -103,7 +128,22 @@ app.get('/api/init', (req, res) => {
 app.use('/api/patients', crudRouter('patients', 'p'));
 app.use('/api/dentists', crudRouter('dentists', 'd'));
 app.use('/api/services', crudRouter('services', 's'));
-app.use('/api/appointments', crudRouter('appointments', 'a'));
+
+// Rota de Appointments Customizada para Notificações
+const appointmentRouter = crudRouter('appointments', 'a');
+// Sobrescreve o PUT para interceptar mudanças
+appointmentRouter.put('/:id', (req, res) => {
+    const oldAppt = getById('appointments', req.params.id);
+    const updated = updateItem('appointments', req.params.id, req.body);
+    if (!updated) return res.status(404).json({ error: 'Não encontrado' });
+
+    // Dispara notificação em segundo plano
+    if (oldAppt) notifyReschedule(updated.id, oldAppt, updated).catch(console.error);
+
+    res.json(updated);
+});
+app.use('/api/appointments', appointmentRouter);
+
 app.use('/api/records', crudRouter('records', 'r'));
 app.use('/api/payments', crudRouter('payments', 'pay'));
 app.use('/api/users', crudRouter('users', 'u'));

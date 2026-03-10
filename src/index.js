@@ -19,7 +19,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { initReminders } from './reminders.js';
 import { processMessage } from './flows.js';
-import { startServer } from './server.js';
+import { startServer, setMessenger } from './server.js';
 
 dotenv.config();
 
@@ -132,6 +132,9 @@ async function connect() {
             console.log('═'.repeat(58));
             console.log('💬 Aguardando mensagens...\n');
             console.log('Pressione Ctrl+C para encerrar.\n');
+
+            // Registra o mensageiro no servidor para notificações do Dashboard
+            setMessenger(sendMessage);
 
             // Inicia lembretes automáticos
             initReminders(sendMessage);
