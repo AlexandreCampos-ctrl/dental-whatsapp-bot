@@ -127,9 +127,11 @@ import { existsSync } from 'fs';
 if (existsSync(PUBLIC_DIR)) {
     app.use(express.static(PUBLIC_DIR));
     // SPA fallback — qualquer rota não encontrada serve o index.html
-    app.get('/:path*', (req, res) => {
-        if (!req.path.startsWith('/api')) {
+    app.use((req, res, next) => {
+        if (req.method === 'GET' && !req.path.startsWith('/api')) {
             res.sendFile(join(PUBLIC_DIR, 'index.html'));
+        } else {
+            next();
         }
     });
     console.log(`🌐 Dashboard servido de: ${PUBLIC_DIR}`);
