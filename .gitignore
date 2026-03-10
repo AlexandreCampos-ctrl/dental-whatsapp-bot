@@ -1,0 +1,25 @@
+# Dependências Node
+node_modules/
+
+# Autenticação WhatsApp (não commitar — contém sua sessão)
+auth/
+auth_info_baileys/
+
+# Banco de dados local (não commitar dados de pacientes)
+data/database.json
+
+# Variáveis de ambiente (segredo)
+.env
+
+# Logs
+*.log
+logs/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp

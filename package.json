@@ -1,0 +1,30 @@
+{
+    "name": "dental-whatsapp-bot",
+    "version": "1.0.0",
+    "description": "Secretária Virtual Dani — Bot de WhatsApp para Clínica Odontológica DentalPro",
+    "main": "src/index.js",
+    "type": "module",
+    "scripts": {
+        "start": "node src/index.js",
+        "dev": "node --watch src/index.js",
+        "reminders": "node src/reminders.js"
+    },
+    "keywords": [
+        "whatsapp",
+        "bot",
+        "dental",
+        "agendamento",
+        "baileys"
+    ],
+    "author": "Alexandre Campos",
+    "license": "MIT",
+    "dependencies": {
+        "@whiskeysockets/baileys": "^6.7.18",
+        "date-fns": "^3.6.0",
+        "pino": "^9.7.0",
+        "qrcode-terminal": "^0.12.0",
+        "node-cron": "^3.0.3",
+        "dotenv": "^16.4.7",
+        "lowdb": "^7.0.1"
+    }
+}
